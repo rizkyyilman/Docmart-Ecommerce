@@ -1,142 +1,152 @@
-/* Background dan teks utama */
-body {
-    background-color: #ffffff;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
+    /* Background dan teks utama */
+    body {
+        background-color: #ffffff;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
 
-/* Bagian Slogan */
-.slogan-section {
-    background-image: url('assets/img/doctorbanner.jpg') !important;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    padding: 60px 20px;
-    color: white;
-    text-align: center;
-    position: relative;
-    min-height: 300px; /* Tambahkan ukuran minimum */
-    background-color: #333; /* Warna latar belakang sementara */
-}
+    /* .slogan-section {
+        background-color: #00bcd4;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding: 60px 20px;
+        color: white;
+        text-align: center;
+        position: relative;
+        min-height: 300px; 
+        z-index: 1; 
+    } */
+    
+    .slogan-content {
+        background-image: url('assets/img/doctorbanner2.jpg'); /* Gambar latar belakang */
+        background-size: cover;
+        background-position: center;
+        padding: 60px 20px;
+        color: white;
+        position: relative;
+        min-height: 300px; /* Tambahkan ukuran minimum */
+        z-index: 1; /* Pastikan elemen ini berada di atas */
+        
+        /* Flexbox untuk memusatkan konten */
+        display: flex;
+        flex-direction: column; /* Mengatur arah konten menjadi kolom */
+        justify-content: center; /* Memusatkan secara vertikal */
+        align-items: center; /* Memusatkan secara horizontal */
+    }
 
-.slogan-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Overlay hitam transparan */
-    z-index: 0;
-}
-
-.slogan-content {
-    position: relative;
-    z-index: 1;
-}
-
-.slogan-content h2 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.slogan-content p {
-    font-size: 1.2rem;
-    margin: 0;
-}
-
-/* Styling untuk navbar */
-.navbar {
-    background-color: #00bcd4; /* Warna cyan */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-brand, .nav-link {
-    color: white !important;
-}
-
-.navbar-nav .nav-link:hover {
-    color: #f0f0f0 !important;
-}
-
-/* Styling untuk card produk */
-.product-card {
-    margin-bottom: 30px;
-}
-
-.card {
-    border-radius: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
-    height: 100%; /* Mengatur tinggi kartu agar seragam */
-    display: flex;
-    flex-direction: column;
-}
-
-.card:hover {
-    transform: scale(1.05);
-}
-
-.card-img-top {
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    height: 250px; /* Memperbesar tinggi gambar */
-    object-fit: contain; /* Mengatur agar gambar sepenuhnya masuk dalam area tanpa terpotong */
-    padding: 10px; /* Menambahkan sedikit padding agar gambar tidak terlalu menempel ke tepi */
-}
-
-/* Tombol Detail */
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-}
-
-/* Styling untuk footer */
-footer {
-    background-color: #00bcd4;
-    padding: 10px;
-    color: white;
-    font-size: 0.9rem;
-    border-top: 1px solid #e1e1e1;
-    text-align: center;
-    position: relative;
-    width: 100%;
-    bottom: 0;
-    left: 0;
-}
-
-/* Styling untuk judul */
-h1 {
-    margin-bottom: 30px;
-    color: #333;
-    font-weight: bold;
-    text-align: center;
-}
-
-/* Media query untuk responsivitas */
-@media (max-width: 768px) {
     .slogan-content h2 {
-        font-size: 2rem;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
     }
-    .slogan-content p {
-        font-size: 1rem;
-    }
-}
 
-@media (max-width: 576px) {
-    .slogan-content h2 {
-        font-size: 1.5rem;
-    }
     .slogan-content p {
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    /* Styling untuk navbar */
+    .navbar {
+        background-color: #00bcd4; /* Warna cyan */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand, .nav-link {
+        color: white !important;
+    }
+
+    .navbar-nav .nav-link:hover {
+        color: #f0f0f0 !important;
+    }
+
+    /* Styling untuk card produk */
+    .product-card {
+        margin-bottom: 30px;
+    }
+
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+        height: 100%; /* Mengatur tinggi kartu agar seragam */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    .card-img-top {
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        height: 250px; /* Memperbesar tinggi gambar */
+        object-fit: contain; /* Mengatur agar gambar sepenuhnya masuk dalam area tanpa terpotong */
+        padding: 10px; /* Menambahkan sedikit padding agar gambar tidak terlalu menempel ke tepi */
+    }
+
+    /* Tombol Detail */
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    /* Styling untuk footer */
+    footer {
+        background-color: #00bcd4;
+        padding: 10px;
+        color: white;
         font-size: 0.9rem;
+        border-top: 1px solid #e1e1e1;
+        text-align: center;
+        position: relative;
+        width: 100%;
+        bottom: 0;
+        left: 0;
     }
-}
+
+    .navbar-custom {
+        background-color: #00BCD4;
+    }
+
+    .navbar-custom .nav-link,
+    .navbar-custom .navbar-brand {
+        color: white !important;
+    }
+
+
+    /* Styling untuk judul */
+    h1 {
+        margin-bottom: 30px;
+        color: #333;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    /* Media query untuk responsivitas */
+    @media (max-width: 768px) {
+        .slogan-content h2 {
+            font-size: 2rem;
+        }
+        .slogan-content p {
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .slogan-content h2 {
+            font-size: 1.5rem;
+        }
+        .slogan-content p {
+            font-size: 0.9rem;
+        }
+    }
