@@ -10,10 +10,13 @@ if (!isset($_SESSION['user'])) {
 $username = $_SESSION['user'];
 
 // Fetch cart items for the logged-in user
-$sql = "SELECT products.* FROM products 
+$sql = "SELECT products.id, products.name, products.price 
+        FROM products 
         JOIN cart ON products.id = cart.product_id 
         WHERE cart.username = '$username'";
 $result = $connection->query($sql);
+
+$total_price = 0; // Variable to store the total price
 ?>
 
 <!DOCTYPE html>
@@ -27,15 +30,26 @@ $result = $connection->query($sql);
 <body>
 
 <div class="container mt-5">
-    <h2>Keranjang</h2>
+    <h2>Keranjang Anda</h2>
     <?php if ($result->num_rows > 0): ?>
-        <ul class="list-group">
+        <ul class="list-group mb-3">
             <?php while ($row = $result->fetch_assoc()): ?>
-                <li class="list-group-item">
+                <?php
+                $total_price += $row['price']; // Add price to total
+                ?>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
                     <?php echo $row['name']; ?> - Rp <?php echo number_format($row['price'], 2, ',', '.'); ?>
                 </li>
             <?php endwhile; ?>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>Total Harga Keseluruhan:</strong>
+                <strong>Rp <?php echo number_format($total_price, 2, ',', '.'); ?></strong>
+            </li>
         </ul>
+        <form action="orders/checkout.php" method="POST">
+            <input type="hidden" name="total_price" value="<?= $total_price ?>">
+            <button type="submit" class="btn btn-primary">Checkout</button>
+        </form>
     <?php else: ?>
         <p>Keranjang Anda kosong.</p>
     <?php endif; ?>
@@ -43,3 +57,4 @@ $result = $connection->query($sql);
 
 </body>
 </html>
+<?php $connection->close(); ?>

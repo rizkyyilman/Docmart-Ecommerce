@@ -14,47 +14,30 @@ if ($connection->connect_error) {
 $error = '';
 $success = '';
 
-// Proses registrasi
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+    $email = $_POST['email'];
+    $phone_number = $_POST['phone_number'];
+    $address = $_POST['address'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    // Validasi jika password dan konfirmasi password sama
-    if ($password !== $confirm_password) {
-        $error = "Password dan konfirmasi password tidak sama!";
+    $sql = "INSERT INTO users (username, email, phone_number, address, password) VALUES (?, ?, ?, ?, ?)";
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("sssss", $username, $email, $phone_number, $address, $password);
+
+    if ($stmt->execute()) {
+        $_SESSION['user'] = $username;
+        header("Location: homePage.php");
+        exit();
     } else {
-        // Cek apakah username sudah digunakan
-        $sql = "SELECT * FROM users WHERE username = ?";
-        $stmt = $connection->prepare($sql);
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            $error = "Username sudah digunakan!";
-        } else {
-            // Hash password sebelum menyimpan
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-            // Simpan data pengguna ke database
-            $sql = "INSERT INTO users (username, password) VALUES (?, ?)";
-            $stmt = $connection->prepare($sql);
-            $stmt->bind_param("ss", $username, $hashed_password);
-
-            if ($stmt->execute()) {
-                $success = "Registrasi berhasil! Silakan <a href='loginPage.php'>login</a>.";
-            } else {
-                $error = "Terjadi kesalahan saat registrasi. Silakan coba lagi.";
-            }
-        }
+        echo "Error: " . $stmt->error;
     }
+
     $stmt->close();
 }
 
 $connection->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -67,37 +50,30 @@ $connection->close();
 <body>
 
 <div class="container mt-5">
-    <h2 class="text-center">Registrasi Akun Baru</h2>
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <form action="registerPage.php" method="POST">
-                <?php if ($error): ?>
-                    <div class="alert alert-danger" role="alert">
-                        <?php echo $error; ?>
-                    </div>
-                <?php endif; ?>
-                <?php if ($success): ?>
-                    <div class="alert alert-success" role="alert">
-                        <?php echo $success; ?>
-                    </div>
-                <?php endif; ?>
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirm_password">Konfirmasi Password</label>
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Daftar</button>
-                <p class="mt-3 text-center">Sudah punya akun? <a href="loginPage.php">Login</a></p>
-            </form>
+    <h2>Register</h2>
+    <form action="registerPage.php" method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" name="username" class="form-control" required>
         </div>
-    </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" name="email" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="phone_number">Nomor Telepon</label>
+            <input type="text" name="phone_number" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="address">Alamat</label>
+            <textarea name="address" class="form-control" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
 </div>
 
 </body>
