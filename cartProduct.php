@@ -9,6 +9,18 @@ if (!isset($_SESSION['user'])) {
 
 $username = $_SESSION['user'];
 
+// Handle product removal from cart
+if (isset($_GET['remove'])) {
+    $product_id = $_GET['remove'];
+    $remove_sql = "DELETE FROM cart WHERE username = ? AND product_id = ?";
+    $remove_stmt = $connection->prepare($remove_sql);
+    $remove_stmt->bind_param("si", $username, $product_id);
+    $remove_stmt->execute();
+    $remove_stmt->close();
+    header("Location: cartProduct.php"); // Refresh the page after removal
+    exit();
+}
+
 // Fetch cart items for the logged-in user
 $sql = "SELECT products.id, products.name, products.price 
         FROM products 
@@ -38,7 +50,13 @@ $total_price = 0; // Variable to store the total price
                 $total_price += $row['price']; // Add price to total
                 ?>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <?php echo $row['name']; ?> - Rp <?php echo number_format($row['price'], 2, ',', '.'); ?>
+                    <div>
+                        <?php echo $row['name']; ?> - Rp <?php echo number_format($row['price'], 2, ',', '.'); ?>
+                    </div>
+                    <div>
+                        <!-- Remove button -->
+                        <a href="cartProduct.php?remove=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm">Remove</a>
+                    </div>
                 </li>
             <?php endwhile; ?>
             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -48,10 +66,15 @@ $total_price = 0; // Variable to store the total price
         </ul>
         <form action="orders/checkout.php" method="POST">
             <input type="hidden" name="total_price" value="<?= $total_price ?>">
+            <a href="index.php" class="btn btn-secondary">Kembali</a>
             <button type="submit" class="btn btn-primary">Checkout</button>
         </form>
     <?php else: ?>
         <p>Keranjang Anda kosong.</p>
+        <form action="orders/checkout.php" method="POST">
+            <input type="hidden" name="total_price" value="<?= $total_price ?>">
+            <a href="index.php" class="btn btn-secondary">Kembali</a>
+            <button type="submit" class="btn btn-primary">Checkout</button>
     <?php endif; ?>
 </div>
 
