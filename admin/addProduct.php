@@ -9,15 +9,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stock = $_POST['stock'];
     $image = '';
 
-    if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-        $photo = basename($_FILES['photo']['name']);
-        $target_dir = "image/";
+    // Pastikan untuk menggunakan "image" sebagai nama file upload
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $photo = basename($_FILES['image']['name']);  // Ubah "photo" menjadi "image"
+        $target_dir = "img/";
         $target_file = $target_dir . $photo;
         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
         $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
 
         if (in_array($imageFileType, $allowed_types)) {
-            if (move_uploaded_file($_FILES['photo']['tmp_name'], $target_file)) {
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                 $stmt = $connection->prepare("INSERT INTO products (name, description, price, stock, image) VALUES (?, ?, ?, ?, ?)");
                 $stmt->bind_param("ssdis", $name, $description, $price, $stock, $photo);
                 if ($stmt->execute()) {
@@ -32,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             echo "Only JPG, JPEG, PNG, and GIF files are allowed.";
         }
     } else {
-        echo "Image upload error: " . $_FILES['photo']['error'];
+        echo "Image upload error: " . $_FILES['image']['error'];
     }
 }
 ?>
