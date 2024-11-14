@@ -33,6 +33,11 @@ if ($user_check_stmt->num_rows == 0) {
 }
 $user_check_stmt->close();
 
+// Pastikan cart tidak kosong
+if (empty($_SESSION['cart'])) {
+    die("Cart kosong!");
+}
+
 // Handle the payment process
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
     $payment_method = $_POST['payment_method'];
@@ -45,55 +50,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
 
     $order_date = date("Y-m-d H:i:s");
 
-    // Insert order into orders table
-    $order_sql = "INSERT INTO orders (user_id, total_price, payment_method, order_date) VALUES (?, ?, ?, ?)";
+    // Ambil username dari database berdasarkan user_id
+    $get_username_sql = "SELECT username FROM users WHERE id = ?";
+    $username_stmt = $connection->prepare($get_username_sql);
+    $username_stmt->bind_param("i", $user_id);
+    $username_stmt->execute();
+    $username_stmt->bind_result($username);
+    $username_stmt->fetch();
+    $username_stmt->close();
+
+    // Simpan order utama
+    $order_sql = "INSERT INTO orders (user_id, username, total_price, payment_method, order_date) VALUES (?, ?, ?, ?, ?)";
     $order_stmt = $connection->prepare($order_sql);
-    $order_stmt->bind_param("idss", $user_id, $total_price, $payment_method, $order_date);
+    $order_stmt->bind_param("isdss", $user_id, $username, $total_price, $payment_method, $order_date);
 
-    if ($order_stmt->execute()) {
-        $order_id = $order_stmt->insert_id; // Get the last inserted order ID
-        $order_stmt->close();
+    if (!$order_stmt->execute()) {
+        die("Error menyimpan order: " . $connection->error);
+    }
 
-        // Insert each product in cart as an order item
-        $cart_sql = "SELECT product_id FROM cart WHERE user_id = ?";
-        $cart_stmt = $connection->prepare($cart_sql);
-        $cart_stmt->bind_param("i", $user_id);
-        $cart_stmt->execute();
-        $cart_result = $cart_stmt->get_result();
+    $order_id = $connection->insert_id;
 
-        while ($row = $cart_result->fetch_assoc()) {
-            $product_id = $row['product_id'];
-            $order_item_sql = "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, 1, (SELECT price FROM products WHERE id = ?))";
-            $order_item_stmt = $connection->prepare($order_item_sql);
-            $order_item_stmt->bind_param("iii", $order_id, $product_id, $product_id);
+    // Simpan detail items dengan error checking
+    foreach ($_SESSION['cart'] as $product_id => $quantity) {
+        // Ambil harga produk dari tabel products
+        $price_sql = "SELECT price FROM products WHERE id = ?";
+        $price_stmt = $connection->prepare($price_sql);
+        $price_stmt->bind_param("i", $product_id);
+        $price_stmt->execute();
+        $price_stmt->bind_result($price);
+        $price_stmt->fetch();
+        $price_stmt->close();
 
-            if (!$order_item_stmt->execute()) {
-                echo "Error inserting order item: " . $order_item_stmt->error;
-                exit();
-            }
-
-            $order_item_stmt->close();
+        $insert_item_sql = "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
+        $item_stmt = $connection->prepare($insert_item_sql);
+        $item_stmt->bind_param("iiid", $order_id, $product_id, $quantity, $price);
+        
+        if (!$item_stmt->execute()) {
+            die("Error menyimpan item: " . $connection->error);
         }
-        $cart_stmt->close();
+        
+        $item_stmt->close();
+    }
 
-        // Clear the cart after successful checkout
-        $clear_cart_sql = "DELETE FROM cart WHERE user_id = ?";
-        $clear_cart_stmt = $connection->prepare($clear_cart_sql);
-        $clear_cart_stmt->bind_param("i", $user_id);
+    // Clear the cart after successful checkout
+    $clear_cart_sql = "DELETE FROM cart WHERE user_id = ?";
+    $clear_cart_stmt = $connection->prepare($clear_cart_sql);
+    $clear_cart_stmt->bind_param("i", $user_id);
 
-        if (!$clear_cart_stmt->execute()) {
-            echo "Error clearing cart: " . $clear_cart_stmt->error;
-            exit();
-        }
-        $clear_cart_stmt->close();
-
-        // Redirect to order success page
-        header("Location: orderSuccess.php?order_id=" . $order_id);
-        exit();
-    } else {
-        echo "Error inserting order: " . $order_stmt->error;
+    if (!$clear_cart_stmt->execute()) {
+        echo "Error clearing cart: " . $clear_cart_stmt->error;
         exit();
     }
+    $clear_cart_stmt->close();
+
+    // Kosongkan keranjang di sesi
+    unset($_SESSION['cart']);
+
+    // Redirect to order success page
+    header("Location: orderSuccess.php?order_id=" . $order_id);
+    exit();
 }
 ?>
 

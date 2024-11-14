@@ -32,14 +32,19 @@ if (!$total_price) {
 }
 
 // Ambil detail produk dari order_items
-$items_sql = "SELECT products.name, products.price, order_items.quantity 
-              FROM order_items 
-              JOIN products ON order_items.product_id = products.id 
-              WHERE order_items.order_id = ?";
+$items_sql = "SELECT p.name, p.price, oi.quantity, (p.price * oi.quantity) as subtotal
+              FROM order_items oi
+              JOIN products p ON oi.product_id = p.id 
+              WHERE oi.order_id = ?";
 $items_stmt = $connection->prepare($items_sql);
 $items_stmt->bind_param("i", $order_id);
 $items_stmt->execute();
 $items_result = $items_stmt->get_result();
+
+// Verifikasi data
+if ($items_result->num_rows == 0) {
+    die("Error: Tidak ada item yang ditemukan untuk order ini");
+}
 
 // Inisialisasi PDF
 class PDF extends FPDF {
@@ -71,26 +76,27 @@ $pdf->Ln(10);
 
 // Tambahkan rincian produk
 $pdf->Cell(0, 10, 'Rincian Produk:', 0, 1);
+
+// Reset total_invoice_price sebelum loop
 $total_invoice_price = 0;
 
-while ($item = mysqli_fetch_assoc($items_result)) {
-    // Hitung total harga untuk item ini
-    $item_total_price = $item['price'] * $item['quantity'];
+// Perbaiki loop untuk menampilkan produk
+while ($item = $items_result->fetch_assoc()) {
     // Tampilkan rincian produk di PDF
     $pdf->Cell(0, 10,
-        htmlspecialchars($item['name']) . ' - Rp ' . number_format($item['price'], 2, ',', '.') . 
-        ' x ' . htmlspecialchars($item['quantity']) . 
-        ' = Rp ' . number_format($item_total_price ,2 , ',', '.'), 
-        0 ,1 );
+        $item['name'] . ' - Rp ' . number_format($item['price'], 0, ',', '.') . 
+        ' x ' . $item['quantity'] . 
+        ' = Rp ' . number_format($item['subtotal'], 0, ',', '.'), 
+        0, 1);
     
-    // Tambahkan total harga item ke total invoice 
-    $total_invoice_price += $item_total_price;
+    // Tambahkan ke total
+    $total_invoice_price += $item['subtotal'];
 }
 
-// Menampilkan total harga invoice 
-$pdf->Ln(10); 
-$pdf->Cell(0 ,10 , 'Total Harga Invoice: Rp '. number_format($total_invoice_price ,2 , ',', '.'), 
-   0 ,1 );
+// Tampilkan total dengan format yang benar
+$pdf->Ln(10);
+$pdf->SetFont('Arial', 'B', 12);
+$pdf->Cell(0, 10, 'Total Harga Invoice: Rp ' . number_format($total_invoice_price, 0, ',', '.'), 0, 1);
 
 // Output PDF 
 $pdf_output_filename='Invoice_'. str_pad($order_id ,5 ,'0' ,STR_PAD_LEFT).'.pdf'; 

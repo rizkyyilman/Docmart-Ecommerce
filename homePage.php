@@ -1,4 +1,4 @@
-    <?php
+<?php
     // Koneksi ke database
     session_start();
     $connection = new mysqli("localhost", "root", "", "docmartbeta");
@@ -83,7 +83,7 @@
                     echo '<h5 class="card-title">' . $row['name'] . '</h5>';
                     echo '<p class="card-text">Harga: Rp ' . number_format($row['price'], 2, ',', '.') . '</p>';
                     echo '<a href="detailProduct.php?id=' . $row['id'] . '" class="btn btn-primary">Detail</a>';
-                    echo '<a href="#" onclick="confirmAddToCart(' . $row['id'] . ')" class="btn btn-success mt-2 btn-buy">Beli</a>'; // Buy Button with confirmation
+                    echo '<a href="#" class="btn btn-success mt-2 btn-buy" data-id="' . $row['id'] . '">Beli</a>';
                     echo '</div>';
                     echo '</div>';
                     echo '</div>';
@@ -105,12 +105,25 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-    // JavaScript function for confirmation
-    function confirmAddToCart(productId) {
-        if (confirm("Apakah Anda yakin ingin menambahkan produk ini ke keranjang?")) {
-            window.location.href = "addToCart.php?id=" + productId;
-        }
-    }
+    document.querySelectorAll('.btn-buy').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            const productId = this.getAttribute('data-id');
+
+            // Konfirmasi sebelum menambahkan ke keranjang
+            if (confirm('Apakah Anda yakin ingin menambahkan produk ini ke dalam keranjang?')) {
+                fetch('addToCart.php?id=' + productId)
+                    .then(response => response.text())
+                    .then(data => {
+                        alert('Produk berhasil ditambahkan ke keranjang!');
+                        // Anda bisa menambahkan logika lain di sini, seperti memperbarui tampilan keranjang
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        });
+    });
     </script>
 
     </body>

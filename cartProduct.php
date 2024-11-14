@@ -2,19 +2,23 @@
 session_start();
 $connection = new mysqli("localhost", "root", "", "docmartbeta");
 
-if (!isset($_SESSION['user'])) {
+if ($connection->connect_error) {
+    die("Connection failed: " . $connection->connect_error);
+}
+
+if (!isset($_SESSION['user']) || !isset($_SESSION['user_id'])) {
     header("Location: loginPage.php");
     exit();
 }
 
-$username = $_SESSION['user'];
+$user_id = $_SESSION['user_id'];
 
 // Handle product removal from cart
 if (isset($_GET['remove'])) {
     $product_id = $_GET['remove'];
-    $remove_sql = "DELETE FROM cart WHERE username = ? AND product_id = ?";
+    $remove_sql = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
     $remove_stmt = $connection->prepare($remove_sql);
-    $remove_stmt->bind_param("si", $username, $product_id);
+    $remove_stmt->bind_param("ii", $user_id, $product_id);
     $remove_stmt->execute();
     $remove_stmt->close();
     header("Location: cartProduct.php"); // Refresh the page after removal
@@ -22,11 +26,14 @@ if (isset($_GET['remove'])) {
 }
 
 // Fetch cart items for the logged-in user
-$sql = "SELECT products.id, products.name, products.price 
+$sql = "SELECT products.id, products.name, products.price, cart.quantity 
         FROM products 
         JOIN cart ON products.id = cart.product_id 
-        WHERE cart.username = '$username'";
-$result = $connection->query($sql);
+        WHERE cart.user_id = ?";
+$stmt = $connection->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
 $total_price = 0; // Variable to store the total price
 ?>
@@ -47,11 +54,12 @@ $total_price = 0; // Variable to store the total price
         <ul class="list-group mb-3">
             <?php while ($row = $result->fetch_assoc()): ?>
                 <?php
-                $total_price += $row['price']; // Add price to total
+                $subtotal = $row['price'] * $row['quantity'];
+                $total_price += $subtotal; // Add subtotal to total
                 ?>
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                        <?php echo $row['name']; ?> - Rp <?php echo number_format($row['price'], 2, ',', '.'); ?>
+                        <?php echo $row['name']; ?> - Rp <?php echo number_format($row['price'], 2, ',', '.'); ?> x <?php echo $row['quantity']; ?>
                     </div>
                     <div>
                         <!-- Remove button -->
@@ -71,13 +79,13 @@ $total_price = 0; // Variable to store the total price
         </form>
     <?php else: ?>
         <p>Keranjang Anda kosong.</p>
-        <form action="orders/checkout.php" method="POST">
-            <input type="hidden" name="total_price" value="<?= $total_price ?>">
-            <a href="index.php" class="btn btn-secondary">Kembali</a>
-            <button type="submit" class="btn btn-primary">Checkout</button>
+        <a href="index.php" class="btn btn-secondary">Kembali</a>
     <?php endif; ?>
 </div>
 
 </body>
 </html>
-<?php $connection->close(); ?>
+<?php
+$stmt->close();
+$connection->close();
+?>
