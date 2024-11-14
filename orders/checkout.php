@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
             <label for="payment_method">Metode Pembayaran:</label>
             <select name="payment_method" id="payment_method" class="form-control" required>
                 <option value="Bank Transfer">Bank Transfer</option>
-                <option value="Credit Card">Credit Card</option>
+                <option value="Credit Card">CreditA Card</option>
             </select>
         </div>
         <input type="hidden" name="total_price" value="<?= $total_price ?>">

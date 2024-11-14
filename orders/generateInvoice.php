@@ -32,7 +32,7 @@ if (!$total_price) {
 }
 
 // Ambil detail produk dari order_items
-$items_sql = "SELECT products.name, products.price, order_items.quantity 
+$items_sql = "SELECT products.name, order_items.price AS item_price, order_items.quantity AS item_quantity 
               FROM order_items 
               JOIN products ON order_items.product_id = products.id 
               WHERE order_items.order_id = ?";
@@ -44,15 +44,12 @@ $items_result = $items_stmt->get_result();
 // Inisialisasi PDF
 class PDF extends FPDF {
     function Header() {
-        // Header PDF
         $this->SetFont('Arial', 'B', 12);
         $this->Cell(0, 10, 'Invoice', 0, 1, 'C');
-        // Spasi setelah header
         $this->Ln(10);
     }
 
     function Footer() {
-        // Footer PDF
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
         $this->Cell(0, 10, 'Page ' . $this->PageNo(), 0, 0, 'C');
@@ -62,9 +59,9 @@ class PDF extends FPDF {
 $pdf = new PDF();
 $pdf->AddPage();
 $pdf->SetFont('Arial', '', 12);
-
 // Tambahkan informasi pelanggan dan detail pesanan
-$pdf->Cell(0, 10, 'Customer Name: ' . htmlspecialchars($_SESSION['user']), 0, 1); // Ganti dengan nama pelanggan yang sesuai
+$customer_name = isset($_SESSION['user']) ? htmlspecialchars($_SESSION['user']) : 'Customer';
+$pdf->Cell(0, 10, 'Customer Name: ' . $customer_name, 0, 1);
 $pdf->Cell(0, 10, 'Invoice Number: ' . htmlspecialchars($order_id), 0, 1);
 $pdf->Cell(0, 10, 'Date: ' . date('d-m-Y', strtotime($order_date)), 0, 1);
 $pdf->Ln(10);
@@ -73,30 +70,31 @@ $pdf->Ln(10);
 $pdf->Cell(0, 10, 'Rincian Produk:', 0, 1);
 $total_invoice_price = 0;
 
-while ($item = mysqli_fetch_assoc($items_result)) {
-    // Hitung total harga untuk item ini
-    $item_total_price = $item['price'] * $item['quantity'];
-    // Tampilkan rincian produk di PDF
+while ($item = $items_result->fetch_assoc()) {
+    $item_name = htmlspecialchars($item['name']);
+    $item_price = $item['item_price'];
+    $item_quantity = $item['item_quantity'];
+    $item_total_price = $item_price * $item_quantity;
+
     $pdf->Cell(0, 10,
-        htmlspecialchars($item['name']) . ' - Rp ' . number_format($item['price'], 2, ',', '.') . 
-        ' x ' . htmlspecialchars($item['quantity']) . 
-        ' = Rp ' . number_format($item_total_price ,2 , ',', '.'), 
-        0 ,1 );
-    
-    // Tambahkan total harga item ke total invoice 
+        $item_name . ' - Rp ' . number_format($item_price, 2, ',', '.') . 
+        ' x ' . htmlspecialchars($item_quantity) . 
+        ' = Rp ' . number_format($item_total_price, 2, ',', '.'), 
+        0, 1
+    );
+
     $total_invoice_price += $item_total_price;
 }
 
 // Menampilkan total harga invoice 
 $pdf->Ln(10); 
-$pdf->Cell(0 ,10 , 'Total Harga Invoice: Rp '. number_format($total_invoice_price ,2 , ',', '.'), 
-   0 ,1 );
+$pdf->Cell(0, 10, 'Total Harga Invoice: Rp ' . number_format($total_invoice_price, 2, ',', '.'), 0, 1);
 
 // Output PDF 
-$pdf_output_filename='Invoice_'. str_pad($order_id ,5 ,'0' ,STR_PAD_LEFT).'.pdf'; 
-$pdf ->Output('D' ,$pdf_output_filename );
+$pdf_output_filename = 'Invoice' . str_pad($order_id, 5, '0', STR_PAD_LEFT) . '.pdf'; 
+$pdf->Output('D', $pdf_output_filename);
 
 // Menutup statement dan koneksi 
-$items_stmt ->close(); 
-$connection ->close(); 
+$items_stmt->close(); 
+$connection->close(); 
 ?>
