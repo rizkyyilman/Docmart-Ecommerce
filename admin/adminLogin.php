@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $admin = $result->fetch_assoc();
         
         // Verifikasi password
-        if ($password & $admin['password']) {
+        if ($password == $admin['password']) {
             $_SESSION['admin_id'] = $admin['id'];
             $_SESSION['admin'] = $admin['username'];
             header("Location: dashboard.php");
@@ -31,10 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     $stmt->close();
-
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -42,22 +40,79 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <title>Admin Login</title>
     <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .login-container h2 {
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group label {
+            font-weight: 600;
+            display: block;
+            text-align: left;
+            color: #555;
+        }
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 5px;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
+    <div class="login-container">
         <h2>Admin Login</h2>
-        <?php if (isset($error)) { echo "<p style='color: red;'>$error</p>"; } ?>
+        <?php if (isset($error)) { echo "<p class='error-message'>$error</p>"; } ?>
         <form method="POST" action="">
             <div class="form-group">
-                <label>Username</label>
-                <input type="text" name="username" class="form-control" required>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" required>
             </div>
             <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="password" class="form-control" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary">Login</button>
         </form>
     </div>
+
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
