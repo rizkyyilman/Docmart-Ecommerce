@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Check if user exists in the database
+    // Cek apakah pengguna ada di database
     $sql = "SELECT * FROM users WHERE username=?";
     $stmt = $connection->prepare($sql);
     $stmt->bind_param("s", $username);
@@ -16,10 +16,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows == 1) {
         $user = $result->fetch_assoc();
         if (password_verify($password, $user['password'])) {
-            // Save user_id and username in session
+            // Simpan user_id dan username di session
             $_SESSION['user_id'] = $user['id'];  // Simpan user ID
             $_SESSION['user'] = $user['username'];  // Simpan username
-            header("Location: index.php");
+            header("Location: index.php"); // Redirect ke halaman utama setelah login berhasil
             exit();
         } else {
             $error = "Password salah.";
