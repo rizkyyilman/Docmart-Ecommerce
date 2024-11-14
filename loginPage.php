@@ -7,13 +7,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // Check if user exists in the database
-    $sql = "SELECT * FROM users WHERE username='$username'";
-    $result = $connection->query($sql);
+    $sql = "SELECT * FROM users WHERE username=?";
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
         $user = $result->fetch_assoc();
         if (password_verify($password, $user['password'])) {
-            $_SESSION['user'] = $username;
+            // Save user_id and username in session
+            $_SESSION['user_id'] = $user['id'];  // Simpan user ID
+            $_SESSION['user'] = $user['username'];  // Simpan username
             header("Location: index.php");
             exit();
         } else {
@@ -22,6 +27,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error = "Pengguna tidak ditemukan.";
     }
+
+    $stmt->close();
 }
 ?>
 
