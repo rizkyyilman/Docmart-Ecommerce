@@ -99,11 +99,32 @@ $result_details = $stmt_details->get_result();
             ?>
         </tbody>
     </table>
-    <a href="getInvoiceEmail.php?order_id=<?= $orderid ?>" class="btn btn-primary">Kirim Invoice ke Email</a>
+    <button onclick="sendEmailNow(event)" class="btn btn-primary">Kirim Invoice ke Email</button>
 </div>
 
-<script src="../assets/js/bootstrap.bundle.min.js"></script>
+</div> <!-- Closing your container -->
+<script>
+    async function sendEmailNow(event) {
+        const button = event.target;
+        console.log('Button clicked');
+        try {
+            button.disabled = true;
+            button.innerHTML = 'Mengirim...';
+            const response = await fetch('getInvoiceEmail.php?order_id=<?php echo $orderId; ?>');
+            const data = await response.text();
+            alert(data);
+        } catch (error) {
+            console.error(error);
+            alert('Gagal mengirim email. Silakan coba lagi.');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = 'Kirim Invoice ke Email';
+        }
+    }
+</script>
 </body>
+</html>
+
 </html>
 
 <?php
