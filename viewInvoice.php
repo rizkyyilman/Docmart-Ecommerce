@@ -34,10 +34,10 @@ if ($result->num_rows == 0) {
 $order = $result->fetch_assoc();
 
 // Ambil detail produk dari pesanan
-$sql_details = "SELECT p.name, op.quantity, op.price, (op.quantity * op.price) AS total_price
-                FROM order_products op
-                JOIN products p ON op.product_id = p.id
-                WHERE op.order_id = ?";
+$sql_details = "SELECT p.name, oi.quantity, oi.price, (oi.quantity * oi.price) AS total_price
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE oi.order_id = ?";
 $stmt_details = $connection->prepare($sql_details);
 $stmt_details->bind_param("i", $orderId);
 $stmt_details->execute();
@@ -80,6 +80,7 @@ $result_details = $stmt_details->get_result();
                 <th>Total Harga</th>
             </tr>
         </thead>
+        
         <tbody>
             <?php
             // Menampilkan detail produk yang dipesan
@@ -98,10 +99,32 @@ $result_details = $stmt_details->get_result();
             ?>
         </tbody>
     </table>
+    <button onclick="sendEmailNow(event)" class="btn btn-primary">Kirim Invoice ke Email</button>
 </div>
 
-<script src="../assets/js/bootstrap.bundle.min.js"></script>
+</div> <!-- Closing your container -->
+<script>
+    async function sendEmailNow(event) {
+        const button = event.target;
+        console.log('Button clicked');
+        try {
+            button.disabled = true;
+            button.innerHTML = 'Mengirim...';
+            const response = await fetch('getInvoiceEmail.php?order_id=<?php echo $orderId; ?>');
+            const data = await response.text();
+            alert(data);
+        } catch (error) {
+            console.error(error);
+            alert('Gagal mengirim email. Silakan coba lagi.');
+        } finally {
+            button.disabled = false;
+            button.innerHTML = 'Kirim Invoice ke Email';
+        }
+    }
+</script>
 </body>
+</html>
+
 </html>
 
 <?php
