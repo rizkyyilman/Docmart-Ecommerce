@@ -34,10 +34,10 @@ if ($result->num_rows == 0) {
 $order = $result->fetch_assoc();
 
 // Ambil detail produk dari pesanan
-$sql_details = "SELECT p.name, op.quantity, op.price, (op.quantity * op.price) AS total_price
-                FROM order_products op
-                JOIN products p ON op.product_id = p.id
-                WHERE op.order_id = ?";
+$sql_details = "SELECT p.name, oi.quantity, oi.price, (oi.quantity * oi.price) AS total_price
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE oi.order_id = ?";
 $stmt_details = $connection->prepare($sql_details);
 $stmt_details->bind_param("i", $orderId);
 $stmt_details->execute();
