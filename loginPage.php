@@ -41,8 +41,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         /* Set full page background to cyan */
+
         body {
-            background-color: #00bcd4;
+            background-image: url('admin/img/masker.jpg');
             display: flex;
             justify-content: center;
             align-items: center;

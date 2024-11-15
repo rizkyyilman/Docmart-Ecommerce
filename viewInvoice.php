@@ -80,6 +80,7 @@ $result_details = $stmt_details->get_result();
                 <th>Total Harga</th>
             </tr>
         </thead>
+        
         <tbody>
             <?php
             // Menampilkan detail produk yang dipesan
@@ -98,6 +99,7 @@ $result_details = $stmt_details->get_result();
             ?>
         </tbody>
     </table>
+    <a href="getInvoiceEmail.php?order_id=<?= $orderid ?>" class="btn btn-primary">Kirim Invoice ke Email</a>
 </div>
 
 <script src="../assets/js/bootstrap.bundle.min.js"></script>
