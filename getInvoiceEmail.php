@@ -104,8 +104,9 @@ try {
     $mail->Port       = 465;
 
     // Set pengirim dan penerima
-    $mail->setFrom('inicimolz@gmail.com', 'DocMart');
-    $mail->addAddress($order['email']); // Email penerima
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_password
+ // Email penerima
 
     // Set konten email
     $mail->isHTML(true);
